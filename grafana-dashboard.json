@@ -1,0 +1,135 @@
+{
+    "dashboard": {
+        "title": "SimpleLogin Metrics Dashboard",
+        "timezone": "browser",
+        "schemaVersion": 16,
+        "version": 0,
+        "refresh": "30s",
+        "panels": [
+            {
+                "title": "HTTP Request Rate",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 0
+                },
+                "targets": [
+                    {
+                        "expr": "rate(simplelogin_http_requests_total[5m])",
+                        "legendFormat": "{{method}} {{endpoint}} ({{status}})"
+                    }
+                ]
+            },
+            {
+                "title": "HTTP Request Duration (P95)",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 0
+                },
+                "targets": [
+                    {
+                        "expr": "histogram_quantile(0.95, rate(simplelogin_http_request_duration_seconds_bucket[5m]))",
+                        "legendFormat": "{{method}} {{endpoint}}"
+                    }
+                ]
+            },
+            {
+                "title": "Postfix Queue Sizes",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 8
+                },
+                "targets": [
+                    {
+                        "expr": "simplelogin_postfix_queue_size",
+                        "legendFormat": "{{queue_type}}"
+                    }
+                ]
+            },
+            {
+                "title": "HTTP Error Rate (5xx)",
+                "type": "graph",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 8
+                },
+                "targets": [
+                    {
+                        "expr": "rate(simplelogin_http_requests_total{status=~\"5..\"}[5m])",
+                        "legendFormat": "{{endpoint}} ({{status}})"
+                    }
+                ]
+            },
+            {
+                "title": "Email Forwards (Total)",
+                "type": "stat",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 0,
+                    "y": 16
+                },
+                "targets": [
+                    {
+                        "expr": "simplelogin_email_forwards_total"
+                    }
+                ]
+            },
+            {
+                "title": "Email Replies (Total)",
+                "type": "stat",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 6,
+                    "y": 16
+                },
+                "targets": [
+                    {
+                        "expr": "simplelogin_email_replies_total"
+                    }
+                ]
+            },
+            {
+                "title": "Active Users",
+                "type": "stat",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 12,
+                    "y": 16
+                },
+                "targets": [
+                    {
+                        "expr": "simplelogin_active_users_total"
+                    }
+                ]
+            },
+            {
+                "title": "Total Aliases",
+                "type": "stat",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 18,
+                    "y": 16
+                },
+                "targets": [
+                    {
+                        "expr": "simplelogin_aliases_total"
+                    }
+                ]
+            }
+        ]
+    }
+}

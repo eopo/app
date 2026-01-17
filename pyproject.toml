@@ -83,6 +83,7 @@ dependencies = [
     "alembic ~= 1.4.3",
     "limits ~= 4.0.1",
     "strictyaml ~= 1.7.3",
+    "prometheus-client ~= 0.20.0",
 
     "sl-pgp"
 ]

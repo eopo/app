@@ -4,11 +4,22 @@ from email.message import Message
 
 import aiospamc
 
-from app.config import SPAMASSASSIN_HOST
+from app.config import ENABLE_SPAM_ASSASSIN, SPAMASSASSIN_HOST
 from app.log import LOG
 from app.message_utils import message_to_bytes
 from app.models import EmailLog
 from app.spamassassin_utils import SpamAssassin
+
+# Prometheus metrics are optional; only emit when available and SA enabled
+try:
+    from app.prometheus_metrics import (
+        PROMETHEUS_AVAILABLE,
+        spamassassin_score,
+        spamassassin_duration_seconds,
+        spamassassin_results_total,
+    )
+except Exception:  # pragma: no cover
+    PROMETHEUS_AVAILABLE = False
 
 
 async def get_spam_score_async(message: Message) -> float:
@@ -19,18 +30,32 @@ async def get_spam_score_async(message: Message) -> float:
         LOG.d("add linebreak to spamassassin input")
         sa_input += b"\n"
 
+    start = time.time()
+
     try:
         # wait for at max 300s which is the default spamd timeout-child
         response = await asyncio.wait_for(
             aiospamc.check(sa_input, host=SPAMASSASSIN_HOST), timeout=300
         )
-        return response.headers["Spam"].score
+        score = response.headers["Spam"].score
+        duration = time.time() - start
+
+        if ENABLE_SPAM_ASSASSIN and PROMETHEUS_AVAILABLE and SPAMASSASSIN_HOST:
+            spamassassin_score.observe(score)
+            spamassassin_duration_seconds.observe(duration)
+            spamassassin_results_total.labels(result="spam" if score >= 5 else "ham").inc()
+
+        return score
     except asyncio.TimeoutError:
         LOG.e("SpamAssassin timeout")
+        if ENABLE_SPAM_ASSASSIN and PROMETHEUS_AVAILABLE and SPAMASSASSIN_HOST:
+            spamassassin_results_total.labels(result="timeout").inc()
         # return a negative score so the message is always considered as ham
         return -999
     except Exception:
         LOG.e("SpamAssassin exception")
+        if ENABLE_SPAM_ASSASSIN and PROMETHEUS_AVAILABLE and SPAMASSASSIN_HOST:
+            spamassassin_results_total.labels(result="error").inc()
         return -999
 
 
@@ -48,10 +73,20 @@ def get_spam_score(
         LOG.d("add linebreak to spamassassin input")
         sa_input += b"\n"
 
+    start = time.time()
+
     try:
         # wait for at max 300s which is the default spamd timeout-child
         sa = SpamAssassin(sa_input, host=SPAMASSASSIN_HOST, timeout=300)
-        return sa.get_score(), sa.get_report_json()
+        score = sa.get_score()
+        duration = time.time() - start
+
+        if ENABLE_SPAM_ASSASSIN and PROMETHEUS_AVAILABLE and SPAMASSASSIN_HOST:
+            spamassassin_score.observe(score)
+            spamassassin_duration_seconds.observe(duration)
+            spamassassin_results_total.labels(result="spam" if score >= 5 else "ham").inc()
+
+        return score, sa.get_report_json()
     except Exception:
         if can_retry:
             LOG.w("SpamAssassin exception, retry")
@@ -60,4 +95,6 @@ def get_spam_score(
         else:
             # return a negative score so the message is always considered as ham
             LOG.e("SpamAssassin exception, ignore spam check")
+            if ENABLE_SPAM_ASSASSIN and PROMETHEUS_AVAILABLE and SPAMASSASSIN_HOST:
+                spamassassin_results_total.labels(result="error").inc()
             return -999, None

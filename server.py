@@ -30,6 +30,7 @@ from app.admin import init_admin
 from app.api.base import api_bp
 from app.auth.base import auth_bp
 from app.build_info import SHA1
+from app.prometheus_metrics import PrometheusMiddleware
 from app.config import (
     DB_URI,
     FLASK_SECRET,
@@ -141,6 +142,9 @@ def create_app() -> Flask:
         initialize_redis_services(app, MEM_STORE_URI)
 
     limiter.init_app(app)
+
+    # Initialize Prometheus metrics middleware
+    PrometheusMiddleware(app)
 
     setup_error_page(app)
 
