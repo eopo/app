@@ -17,6 +17,7 @@ from monitor.metric_exporter import MetricExporter
 # Import Prometheus metrics
 try:
     from app.prometheus_metrics import postfix_queue_size, PROMETHEUS_AVAILABLE
+
     if not PROMETHEUS_AVAILABLE:
         PROMETHEUS_ENABLED = False
     else:
@@ -59,12 +60,12 @@ def log_postfix_metrics():
     newrelic.agent.record_custom_metric("Custom/postfix_incoming_queue", incoming_queue)
     newrelic.agent.record_custom_metric("Custom/postfix_active_queue", active_queue)
     newrelic.agent.record_custom_metric("Custom/postfix_deferred_queue", deferred_queue)
-    
+
     # Also export to Prometheus if enabled
     if PROMETHEUS_ENABLED:
-        postfix_queue_size.labels(queue_type='incoming').set(incoming_queue)
-        postfix_queue_size.labels(queue_type='active').set(active_queue)
-        postfix_queue_size.labels(queue_type='deferred').set(deferred_queue)
+        postfix_queue_size.labels(queue_type="incoming").set(incoming_queue)
+        postfix_queue_size.labels(queue_type="active").set(active_queue)
+        postfix_queue_size.labels(queue_type="deferred").set(deferred_queue)
 
     proc_counts = get_num_procs(["smtp", "smtpd", "bounce", "cleanup"])
     for proc_name in proc_counts:

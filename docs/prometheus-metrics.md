@@ -26,7 +26,7 @@ uv pip install -e .
 - **`simplelogin_http_requests_total`** (Counter)
   - Beschreibung: Gesamtzahl der HTTP-Requests
   - Labels: `method`, `endpoint`, `status`
-  
+
 - **`simplelogin_http_request_duration_seconds`** (Histogram)
   - Beschreibung: HTTP-Request-Dauer in Sekunden
   - Labels: `method`, `endpoint`
@@ -43,20 +43,20 @@ Die folgenden Metriken sind vorbereitet und können in der Anwendung verwendet w
 
 - **`simplelogin_active_users_total`** (Gauge)
   - Beschreibung: Anzahl aktiver Benutzer
-  
+
 - **`simplelogin_aliases_total`** (Gauge)
   - Beschreibung: Gesamtzahl der Aliase
-  
+
 - **`simplelogin_email_forwards_total`** (Counter)
   - Beschreibung: Anzahl weitergeleiteter E-Mails
-  
+
 - **`simplelogin_email_replies_total`** (Counter)
   - Beschreibung: Anzahl versendeter Antworten
 
 - **`simplelogin_job_execution_seconds`** (Histogram)
   - Beschreibung: Job-Ausführungszeit in Sekunden
   - Labels: `job_name`
-  
+
 - **`simplelogin_job_failures_total`** (Counter)
   - Beschreibung: Anzahl fehlgeschlagener Jobs
   - Labels: `job_name`

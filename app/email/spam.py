@@ -43,7 +43,9 @@ async def get_spam_score_async(message: Message) -> float:
         if ENABLE_SPAM_ASSASSIN and PROMETHEUS_AVAILABLE and SPAMASSASSIN_HOST:
             spamassassin_score.observe(score)
             spamassassin_duration_seconds.observe(duration)
-            spamassassin_results_total.labels(result="spam" if score >= 5 else "ham").inc()
+            spamassassin_results_total.labels(
+                result="spam" if score >= 5 else "ham"
+            ).inc()
 
         return score
     except asyncio.TimeoutError:
@@ -84,7 +86,9 @@ def get_spam_score(
         if ENABLE_SPAM_ASSASSIN and PROMETHEUS_AVAILABLE and SPAMASSASSIN_HOST:
             spamassassin_score.observe(score)
             spamassassin_duration_seconds.observe(duration)
-            spamassassin_results_total.labels(result="spam" if score >= 5 else "ham").inc()
+            spamassassin_results_total.labels(
+                result="spam" if score >= 5 else "ham"
+            ).inc()
 
         return score, sa.get_report_json()
     except Exception:

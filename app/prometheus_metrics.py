@@ -1,6 +1,7 @@
 """
 Prometheus metrics for SimpleLogin
 """
+
 try:
     from prometheus_client import (
         Counter,
@@ -14,21 +15,38 @@ try:
     PROMETHEUS_AVAILABLE = True
 except ImportError:
     PROMETHEUS_AVAILABLE = False
+
     # Dummy classes if prometheus_client is not installed
     class Counter:
-        def __init__(self, *args, **kwargs): pass
-        def labels(self, **kwargs): return self
-        def inc(self, *args, **kwargs): pass
-    
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def labels(self, **kwargs):
+            return self
+
+        def inc(self, *args, **kwargs):
+            pass
+
     class Gauge:
-        def __init__(self, *args, **kwargs): pass
-        def labels(self, **kwargs): return self
-        def set(self, *args, **kwargs): pass
-    
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def labels(self, **kwargs):
+            return self
+
+        def set(self, *args, **kwargs):
+            pass
+
     class Histogram:
-        def __init__(self, *args, **kwargs): pass
-        def labels(self, **kwargs): return self
-        def observe(self, *args, **kwargs): pass
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def labels(self, **kwargs):
+            return self
+
+        def observe(self, *args, **kwargs):
+            pass
+
 
 if PROMETHEUS_AVAILABLE:
     # Create a custom registry to avoid conflicts with other prometheus integrations
@@ -36,84 +54,82 @@ if PROMETHEUS_AVAILABLE:
 
     # HTTP Request metrics
     http_requests_total = Counter(
-        'simplelogin_http_requests_total',
-        'Total HTTP requests',
-        ['method', 'endpoint', 'status'],
-        registry=registry
+        "simplelogin_http_requests_total",
+        "Total HTTP requests",
+        ["method", "endpoint", "status"],
+        registry=registry,
     )
 
     http_request_duration_seconds = Histogram(
-        'simplelogin_http_request_duration_seconds',
-        'HTTP request duration in seconds',
-        ['method', 'endpoint'],
-        registry=registry
+        "simplelogin_http_request_duration_seconds",
+        "HTTP request duration in seconds",
+        ["method", "endpoint"],
+        registry=registry,
     )
 
     # Application-specific metrics
     active_users_total = Gauge(
-        'simplelogin_active_users_total',
-        'Total number of active users',
-        registry=registry
+        "simplelogin_active_users_total",
+        "Total number of active users",
+        registry=registry,
     )
 
     aliases_total = Gauge(
-        'simplelogin_aliases_total',
-        'Total number of aliases',
-        registry=registry
+        "simplelogin_aliases_total", "Total number of aliases", registry=registry
     )
 
     email_forwards_total = Counter(
-        'simplelogin_email_forwards_total',
-        'Total number of forwarded emails',
-        registry=registry
+        "simplelogin_email_forwards_total",
+        "Total number of forwarded emails",
+        registry=registry,
     )
 
     email_replies_total = Counter(
-        'simplelogin_email_replies_total',
-        'Total number of email replies',
-        registry=registry
+        "simplelogin_email_replies_total",
+        "Total number of email replies",
+        registry=registry,
     )
 
     # Postfix queue metrics
     postfix_queue_size = Gauge(
-        'simplelogin_postfix_queue_size',
-        'Size of postfix queues',
-        ['queue_type'],
-        registry=registry
+        "simplelogin_postfix_queue_size",
+        "Size of postfix queues",
+        ["queue_type"],
+        registry=registry,
     )
 
     # Job metrics
     job_execution_time = Histogram(
-        'simplelogin_job_execution_seconds',
-        'Job execution time in seconds',
-        ['job_name'],
-        registry=registry
+        "simplelogin_job_execution_seconds",
+        "Job execution time in seconds",
+        ["job_name"],
+        registry=registry,
     )
 
     job_failures_total = Counter(
-        'simplelogin_job_failures_total',
-        'Total number of job failures',
-        ['job_name'],
-        registry=registry
+        "simplelogin_job_failures_total",
+        "Total number of job failures",
+        ["job_name"],
+        registry=registry,
     )
 
     # SpamAssassin metrics (emitted only when SpamAssassin is enabled)
     spamassassin_score = Histogram(
-        'simplelogin_spamassassin_score',
-        'SpamAssassin score per message',
+        "simplelogin_spamassassin_score",
+        "SpamAssassin score per message",
         registry=registry,
     )
 
     spamassassin_duration_seconds = Histogram(
-        'simplelogin_spamassassin_duration_seconds',
-        'SpamAssassin check duration in seconds',
+        "simplelogin_spamassassin_duration_seconds",
+        "SpamAssassin check duration in seconds",
         registry=registry,
     )
 
     spamassassin_results_total = Counter(
-        'simplelogin_spamassassin_results_total',
-        'SpamAssassin classification results',
-        ['result'],
+        "simplelogin_spamassassin_results_total",
+        "SpamAssassin classification results",
+        ["result"],
         registry=registry,
     )
 else:
