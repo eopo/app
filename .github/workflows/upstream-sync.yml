@@ -53,12 +53,12 @@ jobs:
         run: |
           LATEST_TAG="${{ steps.get_release.outputs.tag }}"
           MERGE_BRANCH="upstream-sync/${LATEST_TAG}"
-          
+
           # Erstelle Branch basierend auf aktuellem master
           git checkout master
           git pull origin master || true
           git checkout -B "${MERGE_BRANCH}"
-          
+
           echo "branch=${MERGE_BRANCH}" >> $GITHUB_ENV
 
       - name: Attempt merge
@@ -66,7 +66,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           LATEST_TAG="${{ steps.get_release.outputs.tag }}"
-          
+
           # Versuche zu mergen
           if git merge "upstream/${LATEST_TAG}" -m "Merge upstream release ${LATEST_TAG}" --no-edit; then
             echo "success=true" >> $GITHUB_OUTPUT
@@ -89,7 +89,7 @@ jobs:
           script: |
             const tag = "${{ steps.get_release.outputs.tag }}";
             const branch = "${{ env.branch }}";
-            
+
             // Überprüfe ob PR bereits existiert
             const prs = await github.rest.pulls.list({
               owner: context.repo.owner,
@@ -97,7 +97,7 @@ jobs:
               head: `${context.repo.owner}:${branch}`,
               state: 'open'
             });
-            
+
             if (prs.data.length === 0) {
               const pr = await github.rest.pulls.create({
                 owner: context.repo.owner,
@@ -107,7 +107,7 @@ jobs:
                 base: 'master',
                 body: `🔄 Automatisches Merge von Upstream-Release **${tag}**\n\nDieser PR wurde durch GitHub Actions erstellt und kann automatisch gemergt werden (Conflict-free).`
               });
-              
+
               console.log(`✓ PR erstellt: #${pr.data.number}`);
             } else {
               console.log(`✓ PR existiert bereits: #${prs.data[0].number}`);
@@ -121,10 +121,10 @@ jobs:
           script: |
             const tag = "${{ steps.get_release.outputs.tag }}";
             const branch = "${{ env.branch }}";
-            
+
             // Push den Branch mit Konflikten
             await exec.exec('git', ['push', 'origin', branch, '--force']);
-            
+
             // Überprüfe ob PR bereits existiert
             const prs = await github.rest.pulls.list({
               owner: context.repo.owner,
@@ -132,7 +132,7 @@ jobs:
               head: `${context.repo.owner}:${branch}`,
               state: 'open'
             });
-            
+
             if (prs.data.length === 0) {
               const pr = await github.rest.pulls.create({
                 owner: context.repo.owner,
@@ -142,7 +142,7 @@ jobs:
                 base: 'master',
                 body: `⚠️ Upstream-Release **${tag}** enthält Merge-Konflikte\n\nBitte manuell auflösen und PR rebasen.\n\n**Konflikt-Dateien müssen manuell überprüft werden.**`
               });
-              
+
               console.log(`✓ Konflikt-PR erstellt: #${pr.data.number}`);
             } else {
               console.log(`✓ Konflikt-PR existiert bereits: #${prs.data[0].number}`);

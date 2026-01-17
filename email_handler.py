@@ -141,6 +141,7 @@ from app.handler.dmarc import (
     apply_dmarc_policy_for_reply_phase,
     apply_dmarc_policy_for_forward_phase,
 )
+from app.prometheus_metrics import email_forwards_total, email_replies_total
 from app.handler.provider_complaint import (
     handle_hotmail_complaint,
     handle_yahoo_complaint,
@@ -1009,6 +1010,7 @@ def forward_email_to_mailbox(
             return False, status.E407
     else:
         Session.commit()
+        email_forwards_total.inc()
         return True, status.E200
 
 
@@ -1349,6 +1351,7 @@ def handle_reply(envelope, msg: Message, rcpt_to: str) -> (bool, str):
         )
 
     # return 250 even if error as user is already informed of the incident and can retry sending the email
+    email_replies_total.inc()
     return True, status.E200
 
 

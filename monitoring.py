@@ -16,7 +16,12 @@ from monitor.metric_exporter import MetricExporter
 
 # Import Prometheus metrics
 try:
-    from app.prometheus_metrics import postfix_queue_size, PROMETHEUS_AVAILABLE
+    from app.prometheus_metrics import (
+        postfix_queue_size,
+        active_users_total,
+        aliases_total,
+        PROMETHEUS_AVAILABLE,
+    )
 
     if not PROMETHEUS_AVAILABLE:
         PROMETHEUS_ENABLED = False
@@ -206,6 +211,41 @@ def log_failed_jobs():
     newrelic.agent.record_custom_metric("Custom/failed_jobs", failed_jobs)
 
 
+@newrelic.agent.background_task()
+def log_user_and_alias_metrics():
+    """Update gauge metrics for active users and total aliases"""
+    from app.models import User, Alias
+
+    # Count active users (not disabled, not soft-deleted)
+    active_users = (
+        Session.query(User)
+        .filter(
+            User.disabled == False,  # noqa: E712
+        )
+        .count()
+    )
+
+    # Count total aliases (not deleted)
+    total_aliases = (
+        Session.query(Alias)
+        .filter(
+            Alias.delete_on == None,  # noqa: E711
+        )
+        .count()
+    )
+
+    LOG.d(f"Active users: {active_users}, Total aliases: {total_aliases}")
+
+    # Update New Relic metrics
+    newrelic.agent.record_custom_metric("Custom/active_users", active_users)
+    newrelic.agent.record_custom_metric("Custom/total_aliases", total_aliases)
+
+    # Update Prometheus gauges if enabled
+    if PROMETHEUS_ENABLED:
+        active_users_total.set(active_users)
+        aliases_total.set(total_aliases)
+
+
 if __name__ == "__main__":
     exporter = MetricExporter(get_newrelic_license())
     while True:
@@ -217,6 +257,7 @@ if __name__ == "__main__":
         log_nb_db_connection_by_app_name()
         log_jobs_to_run()
         log_failed_jobs()
+        log_user_and_alias_metrics()
         Session.close()
 
         exporter.run()

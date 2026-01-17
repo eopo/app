@@ -1,135 +1,605 @@
 {
-    "dashboard": {
-        "title": "SimpleLogin Metrics Dashboard",
-        "timezone": "browser",
-        "schemaVersion": 16,
-        "version": 0,
-        "refresh": "30s",
-        "panels": [
+    "annotations": {
+        "list": [
             {
-                "title": "HTTP Request Rate",
-                "type": "graph",
-                "gridPos": {
-                    "h": 8,
-                    "w": 12,
-                    "x": 0,
-                    "y": 0
-                },
-                "targets": [
-                    {
-                        "expr": "rate(simplelogin_http_requests_total[5m])",
-                        "legendFormat": "{{method}} {{endpoint}} ({{status}})"
-                    }
-                ]
-            },
-            {
-                "title": "HTTP Request Duration (P95)",
-                "type": "graph",
-                "gridPos": {
-                    "h": 8,
-                    "w": 12,
-                    "x": 12,
-                    "y": 0
-                },
-                "targets": [
-                    {
-                        "expr": "histogram_quantile(0.95, rate(simplelogin_http_request_duration_seconds_bucket[5m]))",
-                        "legendFormat": "{{method}} {{endpoint}}"
-                    }
-                ]
-            },
-            {
-                "title": "Postfix Queue Sizes",
-                "type": "graph",
-                "gridPos": {
-                    "h": 8,
-                    "w": 12,
-                    "x": 0,
-                    "y": 8
-                },
-                "targets": [
-                    {
-                        "expr": "simplelogin_postfix_queue_size",
-                        "legendFormat": "{{queue_type}}"
-                    }
-                ]
-            },
-            {
-                "title": "HTTP Error Rate (5xx)",
-                "type": "graph",
-                "gridPos": {
-                    "h": 8,
-                    "w": 12,
-                    "x": 12,
-                    "y": 8
-                },
-                "targets": [
-                    {
-                        "expr": "rate(simplelogin_http_requests_total{status=~\"5..\"}[5m])",
-                        "legendFormat": "{{endpoint}} ({{status}})"
-                    }
-                ]
-            },
-            {
-                "title": "Email Forwards (Total)",
-                "type": "stat",
-                "gridPos": {
-                    "h": 4,
-                    "w": 6,
-                    "x": 0,
-                    "y": 16
-                },
-                "targets": [
-                    {
-                        "expr": "simplelogin_email_forwards_total"
-                    }
-                ]
-            },
-            {
-                "title": "Email Replies (Total)",
-                "type": "stat",
-                "gridPos": {
-                    "h": 4,
-                    "w": 6,
-                    "x": 6,
-                    "y": 16
-                },
-                "targets": [
-                    {
-                        "expr": "simplelogin_email_replies_total"
-                    }
-                ]
-            },
-            {
-                "title": "Active Users",
-                "type": "stat",
-                "gridPos": {
-                    "h": 4,
-                    "w": 6,
-                    "x": 12,
-                    "y": 16
-                },
-                "targets": [
-                    {
-                        "expr": "simplelogin_active_users_total"
-                    }
-                ]
-            },
-            {
-                "title": "Total Aliases",
-                "type": "stat",
-                "gridPos": {
-                    "h": 4,
-                    "w": 6,
-                    "x": 18,
-                    "y": 16
-                },
-                "targets": [
-                    {
-                        "expr": "simplelogin_aliases_total"
-                    }
-                ]
+                "builtIn": 1,
+                "datasource": "-- Prometheus --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
             }
         ]
-    }
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "panels": [
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            },
+            "id": 2,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "rate(simplelogin_http_requests_total[5m])",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{method}} {{endpoint}} {{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "HTTP Request Rate (5m)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 0
+            },
+            "id": 3,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, rate(simplelogin_http_request_duration_seconds_bucket[5m]))",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{method}} {{endpoint}} p95",
+                    "refId": "A"
+                }
+            ],
+            "title": "HTTP Request Duration (P95)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+            },
+            "id": 4,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "simplelogin_postfix_queue_size",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{queue_type}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Postfix Queue Sizes",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 8
+            },
+            "id": 5,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "rate(simplelogin_http_requests_total{status=~\"5..\"}[5m])",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{endpoint}} {{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "HTTP Error Rate (5xx)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "tooltip": false,
+                            "viz": false,
+                            "legend": false
+                        }
+                    },
+                    "mappings": []
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 0,
+                "y": 16
+            },
+            "id": 6,
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "pieType": "pie",
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "rate(simplelogin_http_requests_total[5m])",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "HTTP Status Distribution",
+            "type": "piechart"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 6,
+                "y": 16
+            },
+            "id": 7,
+            "options": {
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "auto"
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "simplelogin_email_forwards_total",
+                    "format": "time_series",
+                    "intervalFactor": 1,
+                    "refId": "A"
+                }
+            ],
+            "title": "Email Forwards (Total)",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 12,
+                "y": 16
+            },
+            "id": 8,
+            "options": {
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "auto"
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "simplelogin_email_replies_total",
+                    "format": "time_series",
+                    "intervalFactor": 1,
+                    "refId": "A"
+                }
+            ],
+            "title": "Email Replies (Total)",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 18,
+                "y": 16
+            },
+            "id": 9,
+            "options": {
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "auto"
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "simplelogin_active_users_total",
+                    "format": "time_series",
+                    "intervalFactor": 1,
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Users",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 0,
+                "y": 20
+            },
+            "id": 10,
+            "options": {
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "auto"
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "simplelogin_aliases_total",
+                    "format": "time_series",
+                    "intervalFactor": 1,
+                    "refId": "A"
+                }
+            ],
+            "title": "Total Aliases",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 24
+            },
+            "id": 11,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "rate(simplelogin_job_execution_seconds_count[5m])",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{job_name}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Job Execution Rate",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 24
+            },
+            "id": 12,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "rate(simplelogin_job_failures_total[5m])",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{job_name}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Job Failure Rate",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 32
+            },
+            "id": 13,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "rate(simplelogin_spamassassin_score_bucket[5m])",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "SpamAssassin Score",
+                    "refId": "A"
+                }
+            ],
+            "title": "SpamAssassin Score Distribution",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 32
+            },
+            "id": 14,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "rate(simplelogin_spamassassin_duration_seconds_bucket[5m])",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "Duration",
+                    "refId": "A"
+                }
+            ],
+            "title": "SpamAssassin Check Duration",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "tooltip": false,
+                            "viz": false,
+                            "legend": false
+                        }
+                    },
+                    "mappings": []
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 40
+            },
+            "id": 15,
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "pieType": "pie",
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "pluginVersion": "8.0.0",
+            "targets": [
+                {
+                    "expr": "simplelogin_spamassassin_results_total",
+                    "format": "time_series",
+                    "intervalFactor": 2,
+                    "legendFormat": "{{result}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "SpamAssassin Results Distribution",
+            "type": "piechart"
+        }
+    ],
+    "schemaVersion": 27,
+    "style": "dark",
+    "tags": ["simplelogin", "prometheus", "monitoring"],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "SimpleLogin Prometheus Metrics Dashboard",
+    "uid": "simplelogin-metrics",
+    "version": 1
 }
