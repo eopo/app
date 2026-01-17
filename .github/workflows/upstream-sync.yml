@@ -1,0 +1,165 @@
+name: Sync Upstream Releases
+
+on:
+  schedule:
+    # Täglich um 02:00 UTC nach neuen Upstream-Releases checken
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Manuelles Triggern ermöglichen
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/simple-login/app.git || true
+          git fetch upstream
+
+      - name: Get latest upstream release
+        id: get_release
+        run: |
+          # Hole den neuesten Tag vom Upstream
+          LATEST_TAG=$(git tag -l --sort=-version:refname --merged upstream/master | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          echo "tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          echo "Latest upstream tag: ${LATEST_TAG}"
+
+      - name: Check if tag already exists locally
+        id: check_tag
+        run: |
+          LATEST_TAG="${{ steps.get_release.outputs.tag }}"
+          if [ -z "$LATEST_TAG" ]; then
+            echo "exists=false" >> $GITHUB_OUTPUT
+          elif git rev-parse "${LATEST_TAG}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or update merge branch
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          LATEST_TAG="${{ steps.get_release.outputs.tag }}"
+          MERGE_BRANCH="upstream-sync/${LATEST_TAG}"
+          
+          # Erstelle Branch basierend auf aktuellem master
+          git checkout master
+          git pull origin master || true
+          git checkout -B "${MERGE_BRANCH}"
+          
+          echo "branch=${MERGE_BRANCH}" >> $GITHUB_ENV
+
+      - name: Attempt merge
+        id: merge
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          LATEST_TAG="${{ steps.get_release.outputs.tag }}"
+          
+          # Versuche zu mergen
+          if git merge "upstream/${LATEST_TAG}" -m "Merge upstream release ${LATEST_TAG}" --no-edit; then
+            echo "success=true" >> $GITHUB_OUTPUT
+            echo "✓ Merge erfolgreich"
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+            echo "✗ Merge-Konflikte erkannt"
+          fi
+
+      - name: Push merged changes
+        if: steps.check_tag.outputs.exists == 'false' && steps.merge.outputs.success == 'true'
+        run: |
+          git push origin "${{ env.branch }}" --force
+
+      - name: Create pull request for successful merge
+        if: steps.check_tag.outputs.exists == 'false' && steps.merge.outputs.success == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const tag = "${{ steps.get_release.outputs.tag }}";
+            const branch = "${{ env.branch }}";
+            
+            // Überprüfe ob PR bereits existiert
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+            
+            if (prs.data.length === 0) {
+              const pr = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore: sync upstream release ${tag}`,
+                head: branch,
+                base: 'master',
+                body: `🔄 Automatisches Merge von Upstream-Release **${tag}**\n\nDieser PR wurde durch GitHub Actions erstellt und kann automatisch gemergt werden (Conflict-free).`
+              });
+              
+              console.log(`✓ PR erstellt: #${pr.data.number}`);
+            } else {
+              console.log(`✓ PR existiert bereits: #${prs.data[0].number}`);
+            }
+
+      - name: Create pull request for failed merge
+        if: steps.check_tag.outputs.exists == 'false' && steps.merge.outputs.success == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const tag = "${{ steps.get_release.outputs.tag }}";
+            const branch = "${{ env.branch }}";
+            
+            // Push den Branch mit Konflikten
+            await exec.exec('git', ['push', 'origin', branch, '--force']);
+            
+            // Überprüfe ob PR bereits existiert
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+            
+            if (prs.data.length === 0) {
+              const pr = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore: sync upstream release ${tag} (conflicts)`,
+                head: branch,
+                base: 'master',
+                body: `⚠️ Upstream-Release **${tag}** enthält Merge-Konflikte\n\nBitte manuell auflösen und PR rebasen.\n\n**Konflikt-Dateien müssen manuell überprüft werden.**`
+              });
+              
+              console.log(`✓ Konflikt-PR erstellt: #${pr.data.number}`);
+            } else {
+              console.log(`✓ Konflikt-PR existiert bereits: #${prs.data[0].number}`);
+            }
+
+      - name: Notify on success
+        if: steps.check_tag.outputs.exists == 'false' && steps.merge.outputs.success == 'true'
+        run: |
+          echo "✅ Upstream-Sync erfolgreich"
+          echo "Branch: ${{ env.branch }}"
+          echo "Tag: ${{ steps.get_release.outputs.tag }}"
+          echo "PR wird automatisch erstellt und triggert main.yml bei Merge"
+
+      - name: Notify on conflict
+        if: steps.check_tag.outputs.exists == 'false' && steps.merge.outputs.success == 'false'
+        run: |
+          echo "⚠️ Merge-Konflikte erkannt"
+          echo "Branch: ${{ env.branch }}"
+          echo "Tag: ${{ steps.get_release.outputs.tag }}"
+          echo "Bitte manuell auflösen und PR rebasen"
