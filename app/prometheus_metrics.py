@@ -64,6 +64,7 @@ if PROMETHEUS_AVAILABLE:
         "simplelogin_http_request_duration_seconds",
         "HTTP request duration in seconds",
         ["method", "endpoint"],
+        buckets=(0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0, float("inf")),
         registry=registry,
     )
 
@@ -103,6 +104,7 @@ if PROMETHEUS_AVAILABLE:
         "simplelogin_job_execution_seconds",
         "Job execution time in seconds",
         ["job_name"],
+        buckets=(0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0, float("inf")),
         registry=registry,
     )
 
@@ -117,12 +119,14 @@ if PROMETHEUS_AVAILABLE:
     spamassassin_score = Histogram(
         "simplelogin_spamassassin_score",
         "SpamAssassin score per message",
+        buckets=(-5, 0, 2, 5, 10, 20, 50, float("inf")),
         registry=registry,
     )
 
     spamassassin_duration_seconds = Histogram(
         "simplelogin_spamassassin_duration_seconds",
         "SpamAssassin check duration in seconds",
+        buckets=(0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0, float("inf")),
         registry=registry,
     )
 

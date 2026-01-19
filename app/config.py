@@ -99,6 +99,9 @@ SENTRY_TRACE_RATE = float(os.environ.get("SENTRY_TRACE_RATE", "0.001"))
 # can use another sentry project for the front-end to avoid noises
 SENTRY_FRONT_END_DSN = os.environ.get("SENTRY_FRONT_END_DSN") or SENTRY_DSN
 
+# Prometheus metrics API key
+METRICS_API_KEY = os.environ.get("METRICS_API_KEY")
+
 # Email related settings
 NOT_SEND_EMAIL = "NOT_SEND_EMAIL" in os.environ
 EMAIL_DOMAIN = os.environ["EMAIL_DOMAIN"].lower()
